@@ -22,7 +22,8 @@
 
 ### 공통 컴포넌트 개발
 
-- 목표 : 앱 전체에서 사용하는 공통 컴포넌트를 전담해서 개발
+- 목표
+  - 앱 전체에서 사용하는 공통 컴포넌트를 전담해서 개발
 - 활동
   - 특정 기능에 국한되지 않고 재사용 할 수 있는 요소들을 공통 컴포넌트로 개발 ([관련 issue](https://github.com/codeit-fe18-4-3/coworkers/issues/2))
   - [Storybook](https://codeit-fe18-4-3.github.io/coworkers/)을 활용하여 개발된 공통 컴포넌트 문서화
@@ -33,7 +34,8 @@
 
 ### 유저 인증 로직 개발
 
-- 목표 : 보안과 개발 편의성을 모두 고려한 access token 및 refresh token 관리 로직 개발
+- 목표
+  - 보안과 개발 편의성을 모두 고려한 access token 및 refresh token 관리 로직 개발
 - 활동
   - Access token과 refresh token을 response body로 받을 때 token을 안전하게 보관하면서도 개발 편의성을 높이고 구현 복잡도는 낮추는 방향으로 설계
   - 인증 관련 API들은 Next.js의 API routes 기능을 활용하여 proxy를 통해 요청하도록 구현 ([source code](https://github.com/codeit-fe18-4-3/coworkers/tree/develop/src/pages/api/auth))
@@ -62,7 +64,8 @@
 
 ### 프로젝트 관리 역할
 
-- 목표 : 프로젝트를 기한 내에 성공적으로 완료하고 모든 팀원들이 성장하는 것을 목표로 진행
+- 목표
+  - 프로젝트를 기한 내에 성공적으로 완료하고 모든 팀원들이 성장하는 것을 목표로 진행
 - 활동
   - 팀원들에게 담당한 부분의 기획 및 요구사항을 분석하여 개발 범위를 파악하고 공수를 산정하는 방법을 공유하고, [GitHub project의 timeline](https://github.com/orgs/codeit-fe18-4-3/projects/2/views/1)으로 일정 관리
   - 팀원들이 올린 PR에 상세한 코드 리뷰 진행 (e.g. [예시 1](https://github.com/codeit-fe18-4-3/coworkers/pull/65#discussion_r2533600277), [예시 2](https://github.com/codeit-fe18-4-3/coworkers/pull/66#discussion_r2529530465))
