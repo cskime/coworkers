@@ -27,22 +27,22 @@
   - 특정 기능에 국한되지 않고 재사용 할 수 있는 요소들을 공통 컴포넌트로 개발 ([관련 issue](https://github.com/codeit-fe18-4-3/coworkers/issues/2))
   - [Storybook](https://codeit-fe18-4-3.github.io/coworkers/)을 활용하여 개발된 공통 컴포넌트 문서화
 - 성과
-  - 프로젝트 초반에 공통 컴포넌트를 빠르게 개발하여 팀원들이 page를 개발할 때 곧바로 활용할 수 있었음
-  - 공통 컴포넌트를 한 명이 전담해서 개발하여 기능 추가, 버그 수정 등 요청에 빠르게 대응할 수 있었음
-  - Storybook을 활용하여 별도의 공통 컴포넌트 page를 추가 개발하지 않고 빠르게 문서화할 수 있었음
+  - 팀원들이 공통 컴포넌트를 신경쓰지 않고 요구사항 분석 및 개발에 집중할 수 있었음
+  - 전체 공통 컴포넌트를 전담해서 개발하여 기능 추가, 버그 수정 등 요청에 빠르게 대응
+  - Storybook을 활용하여 별도의 공통 컴포넌트 page를 추가 개발하지 않고 빠르게 문서화
 
 ### 유저 인증 로직 개발
 
 - 목표 : 보안과 개발 편의성을 모두 고려한 access token 및 refresh token 관리 로직 개발
 - 활동
   - Access token과 refresh token을 response body로 받을 때 token을 안전하게 보관하면서도 개발 편의성을 높이고 구현 복잡도는 낮추는 방향으로 설계
-  - Sign in, sign up, sign out, token refresh 등 인증 관련 API들은 Next.js의 API routes 기능을 활용하여 proxy를 통해 요청하도록 구현 ([source code](https://github.com/codeit-fe18-4-3/coworkers/tree/develop/src/pages/api/auth))
-    - API proxy는 response body로 받은 refresh token을 `HttpOnly`, `Secure`, `SameSite=strict` cookie로 저장
-    - Access token은 response body로 client에 그대로 전달하고, client에서 전역 상태로 관리
+  - 인증 관련 API들은 Next.js의 API routes 기능을 활용하여 proxy를 통해 요청하도록 구현 ([source code](https://github.com/codeit-fe18-4-3/coworkers/tree/develop/src/pages/api/auth))
+    - Response body로 받은 refresh token을 `HttpOnly`, `Secure`, `SameSite=strict` cookie로 저장
+    - 그 외에는 response를 client에 그대로 전달하고, client는 response body의 access token을 전역 상태로 관리
     - Page가 새로 load 될 때 access token이 유실되는 문제를 해결하기 위해, page가 load 될 때마다 access token을 재발급받고 전역 상태 갱신
-  - Client는 interceptor를 통해 API 요청 시 access token 전송 ([source code](https://github.com/codeit-fe18-4-3/coworkers/blob/develop/src/services/interceptor/client.ts))
+  - Client는 interceptor에서 API 요청 시 access token 설정 ([source code](https://github.com/codeit-fe18-4-3/coworkers/blob/develop/src/services/interceptor/client.ts))
     - Client side에서 API 요청을 보낼 떄 사용하는 axios instance에 request interceptor 추가
-    - Request interceptor는 전역 상태에 접근하여 client에서 API server로 보내는 요청의 `Authorization` header에 access token을 주입
+    - Request interceptor는 전역 상태에 접근하여 client에서 API server로 보내는 요청의 `Authorization` header에 access token 주입
   - SSR 환경에서 API 요청 시 access token 재발급 및 client 전역 상태에 동기화 ([source code](https://github.com/codeit-fe18-4-3/coworkers/blob/develop/src/libs/ssr/with-auth.ts))
     - Page가 새로 로드될 때마다 access token을 재발급받고 API 호출 시 직접 `Authorization` header에 주입
     - 재발급받은 access token을 component에 prop으로 전달하여 client의 access token 전역 상태와 동기화
@@ -80,19 +80,19 @@
   - SSR을 적용한 page들은 React Query를 사용할 때 `getServerSideProps` 함수에서 아래 작업을 반복해야 함
     1. Refresh token cookie가 없거나 token이 만료된 경우 로그인 페이지로 redirect
     2. Proxy로 access token 재발급 요청
-    3. 재발급된 access token을 사용해서 Query를 prefetch
-    4. Page component로 query params 및 access token 전달 (access token은 client의 전역 상태에 동기화하기 위해 필요)
-    5. Server에서 사용한 query client를 dehydrate해서 page component로 전달
+    3. Page component로 query params 및 access token 전달
+       - 새로 발급받은 access token을 client의 전역 상태에 동기화하기 위해 props로 전달
+    4. Server에서 사용한 query client를 dehydrate해서 page component로 전달
   - Page component 에서는 아래 작업을 반복해야 함
     1. Server로부터 전달받은 access token을 `useEffect` 안에서 전역 상태에 동기화
 - 해결 방법
   - 반복되는 패턴의 코드를 재사용 가능한 함수로 만들고, 세부 구현을 신경쓰지 않고 개발할 수 있도록 추상화 필요
-  - Closure를 활용하여 반복되는 코드를 제거하고 `getServerSideProps` 함수를 만들 수 있는 [`gsspWithAuth`](https://github.com/codeit-fe18-4-3/coworkers/blob/3d24658d9e36ad794ef35eade4bb5b8d2d00e8ca/src/libs/ssr/with-auth.ts#L12-L40) 함수 구현
+  - 반복되는 코드를 제거하고 `getServerSideProps` 함수를 만들 수 있는 [`gsspWithAuth`](https://github.com/codeit-fe18-4-3/coworkers/blob/3d24658d9e36ad794ef35eade4bb5b8d2d00e8ca/src/libs/ssr/with-auth.ts#L12-L40) 함수 구현
     - 이 때, `getServerSideProps` 함수의 반환값(`GetServerSidePropsResult`)을 생성해 주는 [`gsspPropsWithTokenReturn`](https://github.com/codeit-fe18-4-3/coworkers/blob/3d24658d9e36ad794ef35eade4bb5b8d2d00e8ca/src/libs/ssr/gssp-return.ts#L12-L30) 함수를 사용
       - `getServerSideProps` 함수 내부에서 반드시 반환해야 하는 값(e.g. access token, dehydrated data)들이 실수로 누락되는 것 방지
       - 복잡한 반환 값 구조를 신경쓰지 않고 함수 호출로 간단히 사용할 수 있도록 추상화
   - HOC pattern을 적용하여 반복되는 코드를 제거하고 SSR page component 함수를 만들 수 있는 [`serverSideComponentWithAuth`](https://github.com/codeit-fe18-4-3/coworkers/blob/3d24658d9e36ad794ef35eade4bb5b8d2d00e8ca/src/libs/ssr/with-auth.ts#L42-L50) 함수 구현
-- 실제 사용 예시
+- 실제 사용 예시 ([source code](https://github.com/codeit-fe18-4-3/coworkers/blob/develop/src/pages/%5BteamId%5D/index.tsx))
 
   ```typescript
   // 1. Page component에서 server로부터 받아서 사용할 prop type 정의
